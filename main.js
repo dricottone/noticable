@@ -1,21 +1,25 @@
-const electron = require('electron');
-const app = electron.app;
-const BrowserWindow = electron.BrowserWindow;
+const { app, BrowserWindow } = require('electron');
+const shortcut = require('electron-localshortcut');
+const path = require('path');
 
-function createWindow () {
+app.on('ready', () => {
   const win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       contextIsolation: true,
-      worldSafeExecuteJavaScript: true
+      nodeIntegration: false,
+      preload: path.join(__dirname, 'preload.js')
     }
   });
 
-  win.loadFile('index.html');
-}
+  win.loadFile(path.join(__dirname, 'index.html'));
 
-app.on('ready', createWindow);
+  shortcut.register(win, 'CmdOrCtrl+S', () => {
+    console.log("[main] triggering 'request-render-markdown'...")
+    win.webContents.send('request-render-markdown', '');
+  });
+});
 
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {

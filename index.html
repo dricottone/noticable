@@ -6,25 +6,49 @@
     <title>Test</title>
     <meta name="descrption" content="" />
     <style>
-#container {
+#container-editor {
   width: 500px;
   height: 300px;
   border: 1px solid #ccc;
 }
+#container-results {
+  width: 500px;
+  height: 300px;
+}
     </style>
   </head>
   <body>
-    <div id="container"></div>
+    <div id="container-editor"></div>
+    <div id="container-results"></div>
+    <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
     <script>
+// initialize monaco editor
 require.config({ paths: { vs: 'node_modules/monaco-editor/min/vs' } });
-
 require(['vs/editor/editor.main'], function () {
-  const editor = monaco.editor.create(document.getElementById('container'), {
+  window.editor = monaco.editor.create(document.getElementById('container-editor'), {
     language: 'markdown',
+    minimap: {
+      enabled: false
+    },
     value: ''
   });
 });
+
+// listen to preload
+window.addEventListener("message", (event) => {
+  if (event.source != window) return;
+  if (event.data.type && (event.data.type == "request-post-markdown")) {
+    console.log("[renderer] caught 'request-post-markdown'!");
+    console.log("[renderer] sending 'post-markdown'...");
+    window.postMessage({ type: "post-markdown", text: window.editor.getValue() }, "*");
+  };
+  if (event.data.type && (event.data.type == "request-insert-html")) {
+    console.log("[renderer] caught 'request-insert-html'!");
+    $('#container-results').html(event.data.text);
+  };
+}, false);
+
     </script>
   </body>
 </html>
