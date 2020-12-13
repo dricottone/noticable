@@ -7,14 +7,12 @@
   },
   "version": "0.0.1",
   "license": "GPL-3.0",
+  "main": "src/main.js",
+  "scripts": {
+    "start": "electron ."
+  },
   "dependencies": {
-    "css-loader": "^5.0.1",
-    "file-loader": "^6.2.0",
-    "monaco-editor": "^0.21.2",
-    "monaco-editor-webpack-plugin": "^2.0.0",
-    "style-loader": "^2.0.0",
-    "ttf-loader": "^1.0.2",
-    "webpack": "^5.10.1",
-    "webpack-cli": "^4.2.0"
+    "electron": "^11.1.0",
+    "monaco-editor": "^0.21.2"
   }
 }

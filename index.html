@@ -1,13 +1,31 @@
 <!doctype html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width" />
     <title>Test</title>
-    <meta name="descrption" content="">
+    <meta name="descrption" content="" />
+    <style>
+#container {
+  width: 500px;
+  height: 300px;
+  border: 1px solid #ccc;
+}
+    </style>
   </head>
   <body>
-    <script src="dist/app.js"></script>
+    <div id="container"></div>
+    <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
+    <script>
+require.config({ paths: { vs: 'node_modules/monaco-editor/min/vs' } });
+
+require(['vs/editor/editor.main'], function () {
+  const editor = monaco.editor.create(document.getElementById('container'), {
+    value: ['function x() {', '\tconsole.log("Hello world!");', '}'].join('\n'),
+    language: 'javascript'
+  });
+});
+    </script>
   </body>
 </html>
 

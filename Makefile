@@ -1,9 +1,9 @@
 install:
-	npm install monaco-editor monaco-editor-webpack-plugin webpack webpack-cli style-loader css-loader ttf-loader file-loader
+	npm install monaco-editor electron
 
 clean:
 	rm dist/* -f
 
 build:
-	./node_modules/.bin/webpack
+	./node_modules/.bin/electron main.js
 
