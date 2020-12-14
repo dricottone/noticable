@@ -1,47 +1,41 @@
-const { app, BrowserWindow } = require('electron');
-const shortcut = require('electron-localshortcut');
-const path = require('path');
+const { app, BrowserWindow } = require("electron");
+const shortcut = require("electron-localshortcut");
+const path = require("path");
 
+// initialize renderer
 let win;
-const createWindow = () => {
+function createWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
       contextIsolation: true,
       nodeIntegration: false,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, "preload.js")
     }
   });
-
-  win.loadFile(path.join(__dirname, 'index.html'));
-
-  shortcut.register(win, 'CmdOrCtrl+S', () => {
-    console.log("[main] triggering 'request-render-markdown'...")
-    win.webContents.send('request-render-markdown', '');
+  win.loadFile(path.join(__dirname, "index.html"));
+  shortcut.register(win, "CmdOrCtrl+S", () => {
+    console.log("[main] triggering 'request-focus-editor'...");
+    win.webContents.send("request-focus-editor", "");
   });
-  shortcut.register(win, 'CmdOrCtrl+E', () => {
-    console.log("[main] triggering 'request-focus-editor'...")
-    win.webContents.send('request-focus-editor', '');
+  shortcut.register(win, "CmdOrCtrl+E", () => {
+    console.log("[main] triggering 'request-render-markdown'...");
+    win.webContents.send("request-render-markdown", "");
   });
-
-  win.on('closed', () => {
+  win.on("closed", () => {
     win = null;
   });
 };
+app.on("ready", createWindow);
 
-// initialize
-app.on('ready', createWindow);
-
-// macOS convention is to keep process alive (accessible via the dock) until
-// explicitly quit; must handle re-initialization
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
+// macOS best practices
+app.on("window-all-closed", () => {
+  if (process.platform !== "darwin") {
     app.quit();
   }
 });
-
-app.on('activate', () => {
+app.on("activate", () => {
   if (win === null) {
     createWindow();
   }
