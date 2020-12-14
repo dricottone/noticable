@@ -1,0 +1,35 @@
+body {
+  height: 95vh;
+  padding: 0;
+}
+.sidebar {
+  width: 200px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #000;
+  overflow-x: hidden;
+}
+.sidebar li {
+  color: #fff;
+}
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+}
+.container {
+  max-width: 1000px;
+  height: 100%;
+  margin-left: 200px;
+  transition: all 0.4s ease-out;
+  display: none;
+}
+.container.focused {
+  display: block;
+}
+#container-editor {
+  border: 1px solid #ccc;
+}
+
