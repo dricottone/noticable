@@ -2,8 +2,9 @@ const { app, BrowserWindow } = require('electron');
 const shortcut = require('electron-localshortcut');
 const path = require('path');
 
-app.on('ready', () => {
-  const win = new BrowserWindow({
+let win;
+const createWindow = () => {
+  win = new BrowserWindow({
     width: 800,
     height: 600,
     webPreferences: {
@@ -19,8 +20,21 @@ app.on('ready', () => {
     console.log("[main] triggering 'request-render-markdown'...")
     win.webContents.send('request-render-markdown', '');
   });
-});
+  shortcut.register(win, 'CmdOrCtrl+E', () => {
+    console.log("[main] triggering 'request-focus-editor'...")
+    win.webContents.send('request-focus-editor', '');
+  });
 
+  win.on('closed', () => {
+    win = null;
+  });
+};
+
+// initialize
+app.on('ready', createWindow);
+
+// macOS convention is to keep process alive (accessible via the dock) until
+// explicitly quit; must handle re-initialization
 app.on('window-all-closed', () => {
   if (process.platform !== 'darwin') {
     app.quit();
@@ -28,7 +42,7 @@ app.on('window-all-closed', () => {
 });
 
 app.on('activate', () => {
-  if (BrowserWindow.getAllWindows().length === 0) {
+  if (win === null) {
     createWindow();
   }
 });

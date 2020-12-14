@@ -3,23 +3,52 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width" />
-    <title>Test</title>
-    <meta name="descrption" content="" />
+    <title>A noticable note editor</title>
+    <meta name="description" content="" />
+    <link rel="stylesheet" href="node_modules/github-markdown-css/github-markdown.css" />
     <style>
-#container-editor {
-  width: 500px;
-  height: 300px;
-  border: 1px solid #ccc;
+body {
+  height: 95vh;
+  padding: 0;
 }
-#container-results {
-  width: 500px;
-  height: 300px;
+.sidebar {
+  width: 200px;
+  height: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  background-color: #000;
+  overflow-x: hidden;
+}
+.sidebar li {
+  color: #fff;
+}
+.sidebar a {
+  color: #fff;
+  text-decoration: none;
+  display: block;
+}
+.container {
+  max-width: 1000px;
+  height: 100%;
+  margin-left: 200px;
+  transition: all 0.4s ease-out;
+  display: none;
+}
+.container.focused {
+  display: block;
+}
+#container-editor {
+  border: 1px solid #ccc;
 }
     </style>
   </head>
   <body>
-    <div id="container-editor"></div>
-    <div id="container-results"></div>
+    <div class="sidebar">
+      <ul id="list-filenames"></ul>
+    </div>
+    <div class="container focused" id="container-editor"></div>
+    <div class="container markdown-body" id="container-results"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
     <script>
@@ -35,6 +64,20 @@ require(['vs/editor/editor.main'], function () {
   });
 });
 
+function requestPostFile(filename) {
+  console.log("[renderer] triggering 'request-post-file' on '" + filename + "'...");
+  window.postMessage({ type: "request-post-file", text: filename }, "*");
+}
+function sortFileNames(a, b) {
+  return ($(b).text()) < ($(a).text());
+}
+function buildFileName(filename) {
+  var el = document.createElement("li");
+  el.innerHTML = filename;
+  el.addEventListener("click", () => { requestPostFile(filename); });
+  return el
+}
+
 // listen to preload
 window.addEventListener("message", (event) => {
   if (event.source != window) return;
@@ -43,9 +86,24 @@ window.addEventListener("message", (event) => {
     console.log("[renderer] sending 'post-markdown'...");
     window.postMessage({ type: "post-markdown", text: window.editor.getValue() }, "*");
   };
+  if (event.data.type && (event.data.type == "request-insert-filename")) {
+    console.log("[renderer] caught 'request-insert-filename'!");
+    $("#list-filenames").append(buildFileName(event.data.text));
+    $("#list-filenames li").sort(sortFileNames).appendTo("#list-filenames");
+  };
   if (event.data.type && (event.data.type == "request-insert-html")) {
     console.log("[renderer] caught 'request-insert-html'!");
-    $('#container-results').html(event.data.text);
+    $("#container-results").html(event.data.text);
+    $(".container").toggleClass("focused");
+  };
+  if (event.data.type && (event.data.type == "request-toggle-editor")) {
+    console.log("[renderer] caught 'request-toggle-editor'!");
+    $(".container").toggleClass("focused");
+  };
+  if (event.data.type && (event.data.type == "post-file")) {
+    console.log("[renderer] caught 'post-file'!");
+    console.log(event.data.text)
+    window.editor.setValue(event.data.text);
   };
 }, false);
 
