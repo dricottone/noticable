@@ -11,50 +11,100 @@ require(['vs/editor/editor.main'], function () {
 });
 
 // messaging
-function postMarkdown(markdown) {
-  console.log("[renderer] sending 'post-markdown'...");
-  window.postMessage({ type: "post-markdown", text: markdown }, "*");
+function postEditorText() {
+  console.log("[renderer -> preload] posting editor text...");
+  window.postMessage({ type: "post-editor-text", text: window.editor.getValue() }, "*");
 }
-function requestPostFile(filename) {
-  console.log("[renderer] triggering 'request-post-file' on '" + filename + "'...");
-  window.postMessage({ type: "request-post-file", text: filename }, "*");
+function requestFileText(filename) {
+  console.log("[renderer -> preload] requesting file text...");
+  window.postMessage({ type: "request-file-text", text: filename }, "*");
 }
 
 // utilities
-function buildFileName(filename) {
+function buildFilename(filename) {
   var el = document.createElement("li");
   el.innerHTML = filename;
-  el.addEventListener("click", () => { requestPostFile(filename); });
+  el.addEventListener("click", () => { requestFileText(filename); });
   return el
 }
-function sortFileNames(a, b) {
+function sortFilenames(a, b) {
   return ($(b).text()) < ($(a).text());
+}
+function focusEditor() {
+  $("#container-editor").addClass("focused");
+  $("#container-rendered").removeClass("focused");
+  $("#ui-focus-editor").prop("checked", true);
+}
+function unfocusEditor() {
+  if ($("#ui-enable-render").prop("checked")) {
+    $("#container-editor").removeClass("focused");
+    $("#container-rendered").addClass("focused");
+    $("#ui-focus-editor").prop("checked", false);
+  } else {
+    console.log("[renderer] rendering disabled");
+    focusEditor();
+  }
+}
+function toggleEditor() {
+  if ($("#ui-focus-editor").prop("checked")) {
+    unfocusEditor();
+    postEditorText();
+  } else {
+    focusEditor();
+  }
+}
+function uiToggleEditor() {
+  //NOTE: Remember that the status accessed here is the 'new' status, i.e. after it had been toggled
+  if ($("#ui-focus-editor").prop("checked")) {
+    console.log("[renderer] UI focus editor");
+    focusEditor();
+  } else {
+    console.log("[renderer] UI unfocus editor");
+    unfocusEditor();
+    postEditorText();
+  }
 }
 
 // listen to preload
 window.addEventListener("message", (event) => {
   if (event.source != window) return;
-  if (event.data.type && (event.data.type == "request-post-markdown")) {
-    console.log("[renderer] caught 'request-post-markdown'!");
-    postMarkdown(window.editor.getValue());
-  };
-  if (event.data.type && (event.data.type == "request-insert-filename")) {
-    console.log("[renderer] caught 'request-insert-filename'!");
-    $("#list-filenames").append(buildFileName(event.data.text));
-    $("#list-filenames li").sort(sortFileNames).appendTo("#list-filenames");
-  };
-  if (event.data.type && (event.data.type == "request-insert-html")) {
-    console.log("[renderer] caught 'request-insert-html'!");
-    $("#container-results").html(event.data.text);
-    $(".container").toggleClass("focused");
-  };
-  if (event.data.type && (event.data.type == "request-toggle-editor")) {
-    console.log("[renderer] caught 'request-toggle-editor'!");
-    $(".container").toggleClass("focused");
-  };
-  if (event.data.type && (event.data.type == "post-file")) {
-    console.log("[renderer] caught 'post-file'!");
-    window.editor.setValue(event.data.text);
-  };
+  if (event.data.type) {
+    switch(event.data.type) {
+      case "post-file-text":
+        console.log("[renderer] caught file text");
+        window.editor.setValue(event.data.text);
+        focusEditor();
+        break;
+      case "post-display-filename":
+        console.log("[renderer] caught display filename");
+        $("#list-filenames").append(buildFilename(event.data.text));
+        $("#list-filenames li").sort(sortFilenames).appendTo("#list-filenames");
+        break;
+      case "post-html":
+        console.log("[renderer] caught HTML");
+        $("#container-rendered").html(event.data.text);
+        break;
+      case "request-editor-text":
+        console.log("[renderer] caught request for editor text");
+        postEditorText();
+        break;
+      case "request-focus-editor":
+        console.log("[renderer] caught request to focus editor");
+        focusEditor();
+        break;
+      case "request-unfocus-editor":
+        console.log("[renderer] caught request to unfocus editor");
+        unfocusEditor();
+        break;
+      case "request-toggle-editor":
+        console.log("[renderer] caught request to toggle editor");
+        toggleEditor();
+        break;
+      case "request-alert-invalid-filename":
+        console.log("[renderer] caught request to alert about invalid filename");
+        alert("Error: File could not be read");
+        break;
+    }
+  }
 }, false);
 

@@ -14,10 +14,49 @@ body {
 .sidebar li {
   color: #fff;
 }
+.sidebar p {
+  color: white;
+  display: inline-block;
+}
 .sidebar a {
-  color: #fff;
+  color: white;
   text-decoration: none;
   display: block;
+}
+#settings input {
+  height: 0;
+  width: 0;
+  visibility: hidden;
+}
+#settings label {
+  top: 0.25em;
+  cursor: pointer;
+  text-indent: -9999px;
+  width: 40px;
+  height: 20px;
+  background: grey;
+  display: inline-block;
+  position: relative;
+}
+#settings label:after {
+  content: "";
+  position: absolute;
+  top: 1px;
+  left: 1px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  transition: 0.5s;
+}
+#settings input:checked + label {
+  background: seagreen;
+}
+#settings input:checked + label:after {
+  left: calc(100% - 1px);
+  transform: translateX(-100%);
+}
+#settings label:active:after {
+  width: 130px;
 }
 .container {
   max-width: 1000px;

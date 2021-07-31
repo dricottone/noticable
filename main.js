@@ -1,8 +1,31 @@
-const { app, BrowserWindow } = require("electron");
+// constants
+const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const shortcut = require("electron-localshortcut");
 const path = require("path");
 
-// initialize renderer
+// configuration
+const notesDir = "notes";
+
+// messaging
+function postFileName(window, event) {
+  dialog.showSaveDialog(window, {
+    title: "Create new note",
+    defaultPath: notesDir,
+    properties: ["showOverwriteConfirmation"],
+    filters: [
+      { name: "Markdown", extensions: ["md"] },
+      { name: "Plain Text", extensions: ["txt"] },
+    ]
+  })
+  .then(r => {
+    if (!r.canceled) {
+      console.log("[main] posting new filename...");
+      event.sender.send("post-new-filename", r.filePath);
+    }
+  });
+}
+
+// utilities
 let win;
 function createWindow() {
   win = new BrowserWindow({
@@ -14,30 +37,50 @@ function createWindow() {
       preload: path.join(__dirname, "preload.js")
     }
   });
+
   win.loadFile(path.join(__dirname, "index.html"));
-  shortcut.register(win, "CmdOrCtrl+S", () => {
-    console.log("[main] triggering 'request-focus-editor'...");
-    win.webContents.send("request-focus-editor", "");
+}
+function initializeWindow() {
+  createWindow();
+  registerShortCuts(win);
+
+  ipcMain.on("request-local-filename", (event) => {
+    console.log("[main] caught request for local filename");
+    console.log("[main] sending 'request-focus-editor'...");
+    postFileName(win, event);
   });
-  shortcut.register(win, "CmdOrCtrl+E", () => {
-    console.log("[main] triggering 'request-render-markdown'...");
-    win.webContents.send("request-render-markdown", "");
-  });
+
   win.on("closed", () => {
     win = null;
   });
 };
-app.on("ready", createWindow);
+function registerShortCuts(window) {
+  shortcut.register(window, "CmdOrCtrl+E", () => {
+    console.log("[main] focus editor");
+    window.webContents.send("key-focus-editor", "");
+  });
+  shortcut.register(window, "CmdOrCtrl+S", () => {
+    console.log("[main] save text and render markdown");
+    window.webContents.send("key-render-markdown", "");
+  });
+  shortcut.register(window, "CmdOrCtrl+Shift+S", () => {
+    console.log("[main] save text");
+    window.webContents.send("key-save-text", "");
+  });
+}
 
-// macOS best practices
+// app event loop
+app.on("ready", initializeWindow);
+
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") {
     app.quit();
   }
 });
+
 app.on("activate", () => {
   if (win === null) {
-    createWindow();
+    initializeWindow();
   }
 });
 
