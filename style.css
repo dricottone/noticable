@@ -8,11 +8,8 @@ body {
   position: fixed;
   top: 0;
   left: 0;
-  background-color: #000;
+  background-color: black;
   overflow-x: hidden;
-}
-.sidebar li {
-  color: #fff;
 }
 .sidebar p {
   color: white;
@@ -22,6 +19,16 @@ body {
   color: white;
   text-decoration: none;
   display: block;
+}
+ul#list-filenames {
+  list-style-type: none;
+  padding: 0;
+}
+ul#list-filenames li {
+  color: white;
+}
+ul#list-filenames li.highlight {
+  font-weight: bold;
 }
 #settings input {
   height: 0;
@@ -57,6 +64,9 @@ body {
 }
 #settings label:active:after {
   width: 130px;
+}
+#list-filenames li {
+  display: block;
 }
 .container {
   max-width: 1000px;
