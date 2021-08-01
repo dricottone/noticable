@@ -6,10 +6,11 @@ function debug(message) {
 // constants
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const shortcut = require("electron-localshortcut");
+const os = require("os");
 const path = require("path");
 
 // configuration
-const notesDir = "notes";
+const notesDir = path.join(os.homedir(), "notes");
 
 // messaging
 function postFileName(window, event) {

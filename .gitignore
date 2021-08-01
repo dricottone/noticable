@@ -1,2 +1,4 @@
 node_modules/*
+dist/
+noticable-win32-x64/
 

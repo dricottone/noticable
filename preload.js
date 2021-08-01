@@ -5,7 +5,8 @@ function debug(message) {
 
 // constants
 const { ipcRenderer } = require("electron");
-const fs = require("fs")
+const fs = require("fs");
+const os = require("os");
 const path = require("path");
 const md = require("markdown-it")();
 let currentFilename = "";
@@ -13,7 +14,7 @@ let currentFileContent = "";
 
 // configuration
 const newFileButton = "+ New Note";
-const notesDir = "notes";
+const notesDir = path.join(os.homedir(), "notes");
 
 // messaging
 function requestLocalFilename() {
