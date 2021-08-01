@@ -1,6 +1,6 @@
 // to disable logging, comment out the console.log line
 function debug(message) {
-  console.log("[renderer] " + message);
+  //console.log("[renderer] " + message);
 }
 
 // initialize monaco editor
