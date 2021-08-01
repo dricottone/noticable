@@ -1,3 +1,8 @@
+// to disable logging, comment out the console.log line
+function debug(message) {
+  console.log("[renderer] " + message);
+}
+
 // initialize monaco editor
 require.config({ paths: { vs: 'node_modules/monaco-editor/min/vs' } });
 require(['vs/editor/editor.main'], function () {
@@ -12,11 +17,12 @@ require(['vs/editor/editor.main'], function () {
 
 // messaging
 function postEditorText() {
-  console.log("[renderer -> preload] posting editor text...");
+  debug("posting editor text...");
   window.postMessage({ type: "post-editor-text", text: window.editor.getValue() }, "*");
 }
 function requestFileText(filename) {
-  console.log("[renderer -> preload] requesting file text...");
+  debug("posting editor text and requesting text of file '" + filename + "'...");
+  window.postMessage({ type: "post-editor-text", text: window.editor.getValue() }, "*");
   window.postMessage({ type: "request-file-text", text: filename }, "*");
 }
 
@@ -41,7 +47,7 @@ function unfocusEditor() {
     $("#container-rendered").addClass("focused");
     $("#ui-focus-editor").prop("checked", false);
   } else {
-    console.log("[renderer] rendering disabled");
+    debug("rendering disabled; halting unfocus editor");
     focusEditor();
   }
 }
@@ -56,10 +62,10 @@ function toggleEditor() {
 function uiToggleEditor() {
   //NOTE: Remember that the status accessed here is the 'new' status, i.e. after it had been toggled
   if ($("#ui-focus-editor").prop("checked")) {
-    console.log("[renderer] UI focus editor");
+    debug("UI focus editor");
     focusEditor();
   } else {
-    console.log("[renderer] UI unfocus editor");
+    debug("UI unfocus editor");
     unfocusEditor();
     postEditorText();
   }
@@ -71,37 +77,46 @@ window.addEventListener("message", (event) => {
   if (event.data.type) {
     switch(event.data.type) {
       case "post-file-text":
-        console.log("[renderer] caught file text");
+        debug("caught file text");
         window.editor.setValue(event.data.text);
         focusEditor();
         break;
       case "post-display-filename":
-        console.log("[renderer] caught display filename");
-        $("#list-filenames").append(buildFilename(event.data.text));
+        filename = event.data.text
+        debug("caught display filename '" + filename + "'");
+        $("#list-filenames").append(buildFilename(filename));
         $("#list-filenames li").sort(sortFilenames).appendTo("#list-filenames");
         break;
       case "post-html":
-        console.log("[renderer] caught HTML");
+        debug("caught HTML");
         $("#container-rendered").html(event.data.text);
         break;
       case "request-editor-text":
-        console.log("[renderer] caught request for editor text");
+        debug("caught request for editor text");
         postEditorText();
         break;
       case "request-focus-editor":
-        console.log("[renderer] caught request to focus editor");
+        debug("caught request to focus editor");
         focusEditor();
         break;
       case "request-unfocus-editor":
-        console.log("[renderer] caught request to unfocus editor");
+        debug("caught request to unfocus editor");
         unfocusEditor();
         break;
       case "request-toggle-editor":
-        console.log("[renderer] caught request to toggle editor");
+        debug("caught request to toggle editor");
         toggleEditor();
         break;
+      case "request-highlight-filename":
+        filename = event.data.text;
+        debug("caught request to highlight filename '" + filename + "'");
+        $("#list-filenames li").removeClass("highlight");
+        $("#list-filenames li").each( function(i, li) {
+          if ( $(li).text()==filename) $(li).addClass("highlight");
+        });
+        break;
       case "request-alert-invalid-filename":
-        console.log("[renderer] caught request to alert about invalid filename");
+        debug("caught request to alert about invalid filename");
         alert("Error: File could not be read");
         break;
     }

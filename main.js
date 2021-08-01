@@ -1,3 +1,8 @@
+// to disable logging, comment out the console.log line
+function debug(message) {
+  console.log("[main] " + message);
+}
+
 // constants
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const shortcut = require("electron-localshortcut");
@@ -19,8 +24,9 @@ function postFileName(window, event) {
   })
   .then(r => {
     if (!r.canceled) {
-      console.log("[main] posting new filename...");
-      event.sender.send("post-new-filename", r.filePath);
+      filename = r.filePath
+      debug("posting new filename '" + filename + "'...");
+      event.sender.send("post-new-filename", filename);
     }
   });
 }
@@ -45,8 +51,7 @@ function initializeWindow() {
   registerShortCuts(win);
 
   ipcMain.on("request-local-filename", (event) => {
-    console.log("[main] caught request for local filename");
-    console.log("[main] sending 'request-focus-editor'...");
+    debug("caught request for local filename");
     postFileName(win, event);
   });
 
@@ -56,15 +61,15 @@ function initializeWindow() {
 };
 function registerShortCuts(window) {
   shortcut.register(window, "CmdOrCtrl+E", () => {
-    console.log("[main] focus editor");
+    debug("keypress focus editor");
     window.webContents.send("key-focus-editor", "");
   });
   shortcut.register(window, "CmdOrCtrl+S", () => {
-    console.log("[main] save text and render markdown");
+    debug("keypress save text and render markdown");
     window.webContents.send("key-render-markdown", "");
   });
   shortcut.register(window, "CmdOrCtrl+Shift+S", () => {
-    console.log("[main] save text");
+    debug("keypress save text");
     window.webContents.send("key-save-text", "");
   });
 }

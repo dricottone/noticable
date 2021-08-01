@@ -1,3 +1,8 @@
+// to disable logging, comment out the console.log line
+function debug(message) {
+  console.log("[preload] " + message);
+}
+
 // constants
 const { ipcRenderer } = require("electron");
 const fs = require("fs")
@@ -12,39 +17,43 @@ const notesDir = "notes";
 
 // messaging
 function requestLocalFilename() {
-  console.log("[preload -> main] requesting local filename...");
+  debug("requesting local filename...");
   ipcRenderer.send("request-local-filename", "");
 }
 function postFileText(text) {
-  console.log("[preload -> renderer] posting file text...");
+  debug("posting file text...");
   window.postMessage({ type: "post-file-text", text: text }, "*");
 }
 function postDisplayFilename(filename) {
-  console.log("[preload -> renderer] posting display file name...");
+  debug("posting display file name '" + filename + "'...");
   window.postMessage({ type: "post-display-filename", text: filename }, "*");
 }
 function postHTML(html) {
-  console.log("[preload -> renderer] posting HTML...");
+  debug("posting HTML...");
   window.postMessage({ type: "post-html", text: html }, "*");
 }
 function requestEditorText() {
-  console.log("[preload -> renderer] requesting editor text...");
+  debug("requesting editor text...");
   window.postMessage({ type: "request-editor-text" }, "*");
 }
 function requestFocusEditor() {
-  console.log("[preload -> renderer] requesting focus editor...");
+  debug("requesting focus editor...");
   window.postMessage({ type: "request-focus-editor" }, "*");
 }
 function requestUnfocusEditor() {
-  console.log("[preload -> renderer] requesting unfocus editor...");
+  debug("requesting unfocus editor...");
   window.postMessage({ type: "request-unfocus-editor" }, "*");
 }
 function requestToggleEditor() {
-  console.log("[preload -> renderer] requesting toggle editor focus...");
+  debug("requesting toggle editor focus...");
   window.postMessage({ type: "request-toggle-editor" }, "*");
 }
+function requestHighlightFilename(filename) {
+  debug("requesting highlight filename...");
+  window.postMessage({ type: "request-highlight-filename", text: filename }, "*");
+}
 function requestAlertInvalidFilename() {
-  console.log("[preload -> renderer] requesting alert about invalid filename...");
+  debug("requesting alert about invalid filename...");
   window.postMessage({ type: "request-alert-invalid-filename" }, "*");
 }
 
@@ -76,6 +85,7 @@ function readFile(filename) {
     fs.readFile(actualFilename, "utf8", (err, content) => {
       if (err) requestAlertInvalidFilename();
       updateState(actualFilename,content);
+      requestHighlightFilename(filename);
     });
   }
 }
@@ -90,54 +100,56 @@ function updateState(filename, content) {
 function saveFile(content) {
   if (currentFilename != "") {
     currentFileContent = content;
-    console.log("[preload] writing file '" + currentFilename + "'");
+    debug("writing file '" + currentFilename + "'");
     fs.writeFile(currentFilename, currentFileContent, (err) => {
       if (err) throw err;
     });
   } else {
-    console.log("[preload] no filename; cannot write file");
+    debug("no filename; halting write file");
   }
 }
 function saveFileConditional(content) {
   if (currentFilename != "") {
-    if (content != currentFileContent) {
+    if (content != currentFileContent || currentFileContent == "") {
       currentFileContent = content;
-      console.log("[preload] writing updated file '" + currentFilename + "'");
+      debug("writing updated file '" + currentFilename + "'");
       fs.writeFile(currentFilename, currentFileContent, (err) => {
         if (err) throw err;
       });
       return true;
     } else {
-      console.log("[preload] no updates; not writing file");
+      debug("no updates to file; halting write file");
       return false;
     }
   } else {
-    console.log("[preload] no filename; cannot write file");
+    debug("no filename; halting write file");
     return false;
   }
 }
 
 // listen to main process
 ipcRenderer.on("post-new-filename", (event, filename) => {
-  console.log("[preload] caught file name");
+  debug("caught file name '" + filename + "'");
   currentFilename = getActualFilename(filename);
-  postDisplayFilename(getPrettyFilename(filename));
+  prettyFilename = getPrettyFilename(filename);
+  postDisplayFilename(prettyFilename);
+  requestHighlightFilename(prettyFilename);
 });
 ipcRenderer.on("key-save-text", () => {
-  console.log("[preload] caught keybind for save text");
+  debug("caught keybind for save text");
   requestEditorText();
 });
 ipcRenderer.on("key-render-markdown", () => {
-  console.log("[preload] caught keybind for render markdown");
+  debug("caught keybind for render markdown");
   requestEditorText();
   requestUnfocusEditor();
 });
 ipcRenderer.on("key-focus-editor", () => {
-  console.log("[preload] caught keybind for focus editor");
+  debug("caught keybind for focus editor");
   requestFocusEditor();
 });
 ipcRenderer.on("key-unfocus-editor", () => {
-  console.log("[preload] caught keybind for unfocus editor");
+  debug("caught keybind for unfocus editor");
   requestUnfocusEditor();
 });
 
@@ -147,13 +159,14 @@ window.addEventListener("message", (event) => {
   if (event.data.type) {
     switch(event.data.type) {
       case "post-editor-text":
-        console.log("[preload] caught editor text");
+        debug("caught editor text");
         saveFileConditional(event.data.text);
         renderMarkdown(event.data.text);
         break;
       case "request-file-text":
-        console.log("[preload] caught request for file text");
-        readFile(event.data.text);
+        filename = event.data.text
+        debug("caught request for text of file '" + filename + "'");
+        readFile(filename);
         break;
     }
   }
