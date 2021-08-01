@@ -13,12 +13,12 @@
   },
   "dependencies": {
     "cash-dom": "^8.1.0",
-    "electron": "^11.1.0",
+    "electron": "^13.1.7",
     "electron-localshortcut": "^3.2.1",
     "electron-prompt": "^1.6.0",
     "github-markdown-css": "^4.0.0",
-    "jquery": "^3.5.1",
-    "markdown-it": "^12.0.3",
-    "monaco-editor": "^0.21.2"
+    "jquery": "^3.6.0",
+    "markdown-it": "^12.1.0",
+    "monaco-editor": "^0.26.1"
   }
 }
