@@ -8,7 +8,7 @@ const { ipcRenderer } = require("electron");
 const fs = require("fs");
 const os = require("os");
 const path = require("path");
-const md = require("markdown-it")();
+const md = require("markdown-it")({ html: true });
 let currentFilename = "";
 let currentFileContent = "";
 
