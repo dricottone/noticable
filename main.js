@@ -31,6 +31,13 @@ const template = [
           win.webContents.send("menu-save-text", "");
         }
       },
+      {
+        label: "New",
+        accelerator: "CmdOrCtrl+N",
+        click: () => {
+          win.webContents.send("menu-new-file", "");
+        }
+      },
       { type: "separator" },
       {
         label: "Show Notes Directory",

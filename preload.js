@@ -77,10 +77,13 @@ function getActualFilename(filename) {
 function getPrettyFilename(filename) {
   return path.basename(filename, ".md").split("_").join(" ");
 }
+function newFile() {
+  updateState("","");
+  requestLocalFilename();
+}
 function readFile(filename) {
   if (filename == newFileButton) {
-    updateState("","");
-    requestLocalFilename();
+    newFile()
   } else {
     let actualFilename = getActualFilename(filename);
     fs.readFile(actualFilename, "utf8", (err, content) => {
@@ -144,6 +147,11 @@ ipcRenderer.on("menu-render-markdown", () => {
   debug("caught menu button for render markdown");
   requestEditorText();
   requestUnfocusEditor();
+});
+ipcRenderer.on("menu-new-file", () => {
+  debug("caught menu button for new file");
+  requestEditorText();
+  newFile();
 });
 ipcRenderer.on("menu-focus-editor", () => {
   debug("caught menu button for focus editor");
