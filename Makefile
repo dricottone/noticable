@@ -8,16 +8,10 @@ build: clean
 	npm install monaco-editor jquery markdown-it github-markdown-css
 	npm install --save-dev electron electron-builder
 
-build-windows: build
-	#NOTE: works but electron-builder is preferred
-	#./node_modules/.bin/electron-packager ./ noticable --platform=win32 --arch=x64
-
-	#NOTE: works, but is remarkably slower!
-	#./node_modules/.bin/electron-builder --win portable
-
+build-windows: ./node_modules/.bin/electron-builder
 	./node_modules/.bin/electron-builder --win nsis
 
-run:
+run: ./node_modules/.bin/electron
 	./node_modules/.bin/electron main.js
 
 check-updates:
