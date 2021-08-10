@@ -41,7 +41,7 @@ const template = [
       {
         label: "Show Installation Directory",
         click: async () => {
-          await shell.openPath(app.getAppPath());
+          await shell.openPath(__dirname);
         }
       },
       { type: "separator" },
