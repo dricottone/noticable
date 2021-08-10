@@ -4,13 +4,111 @@ function debug(message) {
 }
 
 // constants
-const { app, BrowserWindow, ipcMain, dialog } = require("electron");
-const shortcut = require("electron-localshortcut");
+const { app, BrowserWindow, ipcMain, dialog, shell, Menu } = require("electron");
 const os = require("os");
 const path = require("path");
+let win;
 
 // configuration
 const notesDir = path.join(os.homedir(), "notes");
+
+// manu
+const template = [
+  {
+    label: "File",
+    submenu: [
+      {
+        label: "Save and Render",
+        accelerator: "CmdOrCtrl+S",
+        click: () => {
+          win.webContents.send("key-render-markdown", "");
+        }
+      },
+      {
+        label: "Save",
+        accelerator: "CmdOrCtrl+Shift+S",
+        click: () => {
+          win.webContents.send("key-save-text", "");
+        }
+      },
+      { type: "separator" },
+      {
+        label: "Show Notes Directory",
+        click: async () => {
+          await shell.openPath(notesDir);
+        }
+      },
+      {
+        label: "Show Installation Directory",
+        click: async () => {
+          await shell.openPath(app.getAppPath());
+        }
+      },
+      { type: "separator" },
+      { role: "quit" }
+    ]
+  },
+  {
+    label: "Edit",
+    submenu: [
+      { role: "undo" },
+      { role: "redo" },
+      { type: "separator" },
+      { role: "cut" },
+      { role: "copy" },
+      { role: "paste" },
+      { role: "delete" },
+      { type: "separator" },
+      { role: "selectAll" }
+    ]
+  },
+  {
+    label: "View",
+    submenu: [
+      {
+        label: "Focus Editor Mode",
+        accelerator: "CmdOrCtrl+E",
+        click: () => {
+          win.webContents.send("key-focus-editor", "");
+        }
+      },
+      { type: "separator" },
+      { role: "reload" },
+      { role: "forceReload" },
+      { role: "toggleDevTools" },
+      { type: "separator" },
+      { role: "resetZoom" },
+      { role: "zoomIn" },
+      { role: "zoomOut" },
+      { type: "separator" },
+      { role: "togglefullscreen" },
+    ]
+  },
+  {
+    label: "Window",
+    submenu: [
+      { role: "minimize" }
+    ]
+  },
+  {
+    label: "Help",
+    submenu: [
+      {
+        label: "About",
+        click: async () => {
+          await shell.openExternal("https://github.com/dricottone/noticable");
+        }
+      },
+      {
+        label: "Report Bugs",
+        click: async () => {
+          await shell.openExternal("https://github.com/dricottone/noticable/issues");
+        }
+      }
+    ]
+  }
+];
+Menu.setApplicationMenu(Menu.buildFromTemplate(template));
 
 // messaging
 function postFileName(window, event) {
@@ -33,8 +131,7 @@ function postFileName(window, event) {
 }
 
 // utilities
-let win;
-function createWindow() {
+function initializeWindow() {
   win = new BrowserWindow({
     width: 800,
     height: 600,
@@ -46,10 +143,6 @@ function createWindow() {
   });
 
   win.loadFile(path.join(__dirname, "index.html"));
-}
-function initializeWindow() {
-  createWindow();
-  registerShortCuts(win);
 
   ipcMain.on("request-local-filename", (event) => {
     debug("caught request for local filename");
@@ -60,20 +153,6 @@ function initializeWindow() {
     win = null;
   });
 };
-function registerShortCuts(window) {
-  shortcut.register(window, "CmdOrCtrl+E", () => {
-    debug("keypress focus editor");
-    window.webContents.send("key-focus-editor", "");
-  });
-  shortcut.register(window, "CmdOrCtrl+S", () => {
-    debug("keypress save text and render markdown");
-    window.webContents.send("key-render-markdown", "");
-  });
-  shortcut.register(window, "CmdOrCtrl+Shift+S", () => {
-    debug("keypress save text");
-    window.webContents.send("key-save-text", "");
-  });
-}
 
 // app event loop
 app.on("ready", initializeWindow);

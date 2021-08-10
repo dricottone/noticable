@@ -5,7 +5,7 @@ clean:
 	rm node_modules/* -rf
 
 build: clean
-	npm install monaco-editor electron-localshortcut jquery markdown-it github-markdown-css
+	npm install monaco-editor jquery markdown-it github-markdown-css
 	npm install --save-dev electron electron-builder
 
 build-windows: build

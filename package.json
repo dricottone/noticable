@@ -5,20 +5,17 @@
     "name": "Dominic Ricottone",
     "email": "me@dominic-ricottone.com"
   },
-  "version": "0.0.3",
+  "version": "0.0.4",
   "license": "GPL-3.0",
   "main": "main.js",
   "scripts": {
     "start": "electron ."
   },
   "devDependencies": {
-    "electron": "^13.1.7",
+    "electron": "^13.1.9",
     "electron-builder": "^22.11.7"
   },
   "dependencies": {
-    "cash-dom": "^8.1.0",
-    "electron-localshortcut": "^3.2.1",
-    "electron-prompt": "^1.6.0",
     "github-markdown-css": "^4.0.0",
     "jquery": "^3.6.0",
     "markdown-it": "^12.2.0",

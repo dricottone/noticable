@@ -7,6 +7,7 @@ function debug(message) {
 require.config({ paths: { vs: 'node_modules/monaco-editor/min/vs' } });
 require(['vs/editor/editor.main'], function () {
   window.editor = monaco.editor.create(document.getElementById('container-editor'), {
+    automaticLayout: true,
     language: 'markdown',
     minimap: {
       enabled: false
