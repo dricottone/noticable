@@ -11,7 +11,8 @@ require(['vs/editor/editor.main'], function () {
     minimap: {
       enabled: false
     },
-    value: ''
+    value: '',
+    wordWrap: 'on',
   });
 });
 
