@@ -38,12 +38,6 @@ const template = [
           await shell.openPath(notesDir);
         }
       },
-      {
-        label: "Show Installation Directory",
-        click: async () => {
-          await shell.openPath(__dirname);
-        }
-      },
       { type: "separator" },
       { role: "quit" }
     ]
