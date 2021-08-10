@@ -21,14 +21,14 @@ const template = [
         label: "Save and Render",
         accelerator: "CmdOrCtrl+S",
         click: () => {
-          win.webContents.send("key-render-markdown", "");
+          win.webContents.send("menu-render-markdown", "");
         }
       },
       {
         label: "Save",
         accelerator: "CmdOrCtrl+Shift+S",
         click: () => {
-          win.webContents.send("key-save-text", "");
+          win.webContents.send("menu-save-text", "");
         }
       },
       { type: "separator" },
@@ -63,7 +63,14 @@ const template = [
         label: "Focus Editor Mode",
         accelerator: "CmdOrCtrl+E",
         click: () => {
-          win.webContents.send("key-focus-editor", "");
+          win.webContents.send("menu-focus-editor", "");
+        }
+      },
+      {
+        label: "Focus Rendered Mode",
+        accelerator: "CmdOrCtrl+Shift+E",
+        click: () => {
+          win.webContents.send("menu-unfocus-editor", "");
         }
       },
       { type: "separator" },

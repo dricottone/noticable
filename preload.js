@@ -136,21 +136,21 @@ ipcRenderer.on("post-new-filename", (event, filename) => {
   postDisplayFilename(prettyFilename);
   requestHighlightFilename(prettyFilename);
 });
-ipcRenderer.on("key-save-text", () => {
-  debug("caught keybind for save text");
+ipcRenderer.on("menu-save-text", () => {
+  debug("caught menu button for save text");
   requestEditorText();
 });
-ipcRenderer.on("key-render-markdown", () => {
-  debug("caught keybind for render markdown");
+ipcRenderer.on("menu-render-markdown", () => {
+  debug("caught menu button for render markdown");
   requestEditorText();
   requestUnfocusEditor();
 });
-ipcRenderer.on("key-focus-editor", () => {
-  debug("caught keybind for focus editor");
+ipcRenderer.on("menu-focus-editor", () => {
+  debug("caught menu button for focus editor");
   requestFocusEditor();
 });
-ipcRenderer.on("key-unfocus-editor", () => {
-  debug("caught keybind for unfocus editor");
+ipcRenderer.on("menu-unfocus-editor", () => {
+  debug("caught menu button for unfocus editor");
   requestUnfocusEditor();
 });
 
