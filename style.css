@@ -2,6 +2,7 @@ body {
   height: 95vh;
   padding: 0;
 }
+/* TODO: strip out unnecessary CSS after 0.2 refactor */
 .sidebar {
   width: 200px;
   height: 100%;
