@@ -7,6 +7,7 @@ clean:
 build: clean
 	npm install monaco-editor jquery markdown-it github-markdown-css
 	npm install --save-dev electron electron-builder
+	chmod 755 ./node_modules/.bin/electron
 
 build-windows: ./node_modules/.bin/electron-builder
 	./node_modules/.bin/electron-builder --win nsis
