@@ -1,9 +1,6 @@
-// to disable logging, comment out the console.log line
-function debug(message) {
-  //console.log("[renderer] " + message);
-}
-
-// initialize monaco editor
+////////////////////////////
+// Monaco magic goes here //
+////////////////////////////
 require.config({ paths: { vs: 'node_modules/monaco-editor/min/vs' } });
 require(['vs/editor/editor.main'], function () {
   window.editor = monaco.editor.create(document.getElementById('container-editor'), {
@@ -17,109 +14,137 @@ require(['vs/editor/editor.main'], function () {
   });
 });
 
-// messaging
-function postEditorText() {
-  debug("posting editor text...");
-  window.postMessage({ type: "post-editor-text", text: window.editor.getValue() }, "*");
-}
-function requestFileText(filename) {
-  debug("posting editor text and requesting text of file '" + filename + "'...");
-  window.postMessage({ type: "post-editor-text", text: window.editor.getValue() }, "*");
-  window.postMessage({ type: "request-file-text", text: filename }, "*");
-}
 
-// utilities
-function buildFilename(filename) {
-  var el = document.createElement("li");
-  el.innerHTML = filename;
-  el.addEventListener("click", () => { requestFileText(filename); });
-  return el
-}
-function sortFilenames(a, b) {
-  return ($(b).text()) < ($(a).text());
-}
-function focusEditor() {
+///////////////////////
+// Functions go here //
+///////////////////////
+
+// TODO: Add documentation for all functions.
+
+// Parse a file name and return a pretty note title.
+function cleanTitle(filename) {
+  return filename.split(".")[0].split("_").join(" ");
+};
+
+function showEditor() {
   $("#container-editor").addClass("focused");
-  $("#container-rendered").removeClass("focused");
-  $("#ui-focus-editor").prop("checked", true);
-}
-function unfocusEditor() {
-  if ($("#ui-enable-render").prop("checked")) {
-    $("#container-editor").removeClass("focused");
-    $("#container-rendered").addClass("focused");
-    $("#ui-focus-editor").prop("checked", false);
-  } else {
-    debug("rendering disabled; halting unfocus editor");
-    focusEditor();
-  }
-}
-function toggleEditor() {
-  if ($("#ui-focus-editor").prop("checked")) {
-    unfocusEditor();
-    postEditorText();
-  } else {
-    focusEditor();
-  }
-}
-function uiToggleEditor() {
-  //NOTE: Remember that the status accessed here is the 'new' status, i.e. after it had been toggled
-  if ($("#ui-focus-editor").prop("checked")) {
-    debug("UI focus editor");
-    focusEditor();
-  } else {
-    debug("UI unfocus editor");
-    unfocusEditor();
-    postEditorText();
-  }
-}
+  $("#container-viewer").removeClass("focused");
+};
 
-// listen to preload
+function showViewer() {
+  $("#container-editor").removeClass("focused");
+  $("#container-viewer").addClass("focused");
+};
+
+function addTitle(filename) {
+  let element = document.createElement("li");
+  element.innerHTML = cleanTitle(filename);
+  element.addEventListener("click", () => { preloadContentForCheckThenRead(filename); });
+  $("#list-filenames").append(element)
+};
+
+function newTitle(filename) {
+  $("#list-filenames li").removeClass("focused")
+  let selector = "#list-filenames li:contains(" + cleanTitle(filename) + ")"
+  $(selector).addClass("focused")
+};
+
+function sortTitles() {
+  let sidebar = $("#list-filenames")
+  let titles = sidebar.children("li")
+  titles.detach().sort((a,b) => a.innerText.localeCompare(b.innerText))
+  sidebar.append(titles)
+};
+
+function newContent(content) {
+  window.editor.setValue(content);
+};
+
+function newHTML(html) {
+  $("#container-viewer").html(html);
+};
+
+function preloadContentForSave() {
+  window.postMessage({ type: "contentForSave", text: window.editor.getValue() }, "*");
+};
+
+function preloadContentForSaveThenNew() {
+  window.postMessage({ type: "contentForSaveThenNew", text: window.editor.getValue() }, "*");
+};
+
+function preloadContentForSaveThenRead(filename) {
+  window.postMessage({ type: "contentForSaveThenRead", text: { note: window.editor.getValue(), title: filename } }, "*");
+};
+
+function preloadContentForCheckThenNew() {
+  window.postMessage({ type: "contentForCheckThenNew", text: window.editor.getValue() }, "*");
+};
+
+function preloadContentForCheckThenRead(filename) {
+  window.postMessage({ type: "contentForCheckThenRead", text: { note: window.editor.getValue(), title: filename } }, "*");
+};
+
+function preloadContentForRender() {
+  window.postMessage({ type: "contentForRender", text: window.editor.getValue() }, "*");
+};
+
+
+////////////////////////////
+// Listen for events here //
+////////////////////////////
 window.addEventListener("message", (event) => {
   if (event.source != window) return;
   if (event.data.type) {
+    let parameter = event.data.text;
     switch(event.data.type) {
-      case "post-file-text":
-        debug("caught file text");
-        window.editor.setValue(event.data.text);
-        focusEditor();
+      case "addTitle":
+        addTitle(parameter);
+        sortTitles();
         break;
-      case "post-display-filename":
-        filename = event.data.text
-        debug("caught display filename '" + filename + "'");
-        $("#list-filenames").append(buildFilename(filename));
-        $("#list-filenames li").sort(sortFilenames).appendTo("#list-filenames");
+      case "addTitleOrdered":
+        addTitle(parameter);
         break;
-      case "post-html":
-        debug("caught HTML");
-        $("#container-rendered").html(event.data.text);
+      case "newTitle":
+        newTitle(parameter);
         break;
-      case "request-editor-text":
-        debug("caught request for editor text");
-        postEditorText();
+      case "newContent":
+        newContent(parameter);
         break;
-      case "request-focus-editor":
-        debug("caught request to focus editor");
-        focusEditor();
+      case "newHTML":
+        newHTML(parameter);
         break;
-      case "request-unfocus-editor":
-        debug("caught request to unfocus editor");
-        unfocusEditor();
+      case "sendContentForSave":
+        preloadContentForSave();
         break;
-      case "request-toggle-editor":
-        debug("caught request to toggle editor");
-        toggleEditor();
+      case "sendContentForSaveThenNew":
+        preloadContentForSaveThenNew();
         break;
-      case "request-highlight-filename":
-        filename = event.data.text;
-        debug("caught request to highlight filename '" + filename + "'");
-        $("#list-filenames li").removeClass("highlight");
-        $("#list-filenames li").each( function(i, li) {
-          if ( $(li).text()==filename) $(li).addClass("highlight");
-        });
+      case "sendContentForSaveThenRead":
+        preloadContentForSaveThenRead(parameter);
         break;
-      case "request-alert-invalid-filename":
-        debug("caught request to alert about invalid filename");
-        alert("Error: File could not be read");
+      case "sendContentForCheckThenNew":
+        preloadContentForCheckThenNew();
+        break;
+      case "sendContentForRender":
+        preloadContentForRender();
+        break;
+      case "showEditor":
+        showEditor();
+        break;
+      case "showViewer":
+        showViewer();
+        break;
+      case "fileNotSaved":
+        // TODO: add some UI component to indicate an error occured
+        break;
+      case "fileDiscarded":
+        // TODO: add some UI component to indicate an error occured
+        break;
+      case "fileUnreadable":
+        // TODO: add some UI component to indicate an error occured
+        break;
+      case "fileUnwritable":
+        // TODO: add some UI component to indicate an error occured
         break;
     }
   }

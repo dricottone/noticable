@@ -10,19 +10,11 @@
   </head>
   <body>
     <div class="sidebar">
-      <div id="settings">
-        <p>Editor Mode:</p>
-        <input id="ui-focus-editor" type="checkbox" checked onchange="uiToggleEditor()">
-        <label for="ui-focus-editor"></label>
-        <p>Enable Rendering:</p>
-        <input id="ui-enable-render" type="checkbox" checked>
-        <label for="ui-enable-render"></label>
-      </div>
       <ul id="list-filenames"></ul>
     </div>
     <div class="container focused" id="container-editor"></div>
     <!--NOTE: .markdown-body is the target for Github Markdown CSS module; do not modify!-->
-    <div class="container markdown-body" id="container-rendered"></div>
+    <div class="container markdown-body" id="container-viewer"></div>
     <script src="node_modules/jquery/dist/jquery.min.js"></script>
     <script src="node_modules/monaco-editor/min/vs/loader.js"></script>
     <script src="renderer.js"></script>
