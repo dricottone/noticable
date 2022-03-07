@@ -56,11 +56,8 @@ function relativeNotePath(filename) {
 function promptSave() {
   dialog.showSaveDialog(win, optionsSaveAs)
   .then(r => {
-    if (r.canceled) {
-      announceFileNotSaved();
-    } else {
-      preloadSaveFile(relativeNotePath(r.filePath));
-    }
+    if (r.canceled) announceFileNotSaved();
+    else preloadSaveFile(relativeNotePath(r.filePath));
   });
 };
 
@@ -68,16 +65,12 @@ function promptSave() {
 function rePromptSave() {
   dialog.showMessageBox(win, optionsSaveError)
   .then(r => {
-    if (r.response==0) {
-      announceFileNotSaved();
-    } else {
+    if (r.response==0) announceFileNotSaved();
+    else {
       dialog.showSaveDialog(win, optionsSaveAs)
       .then(r => {
-        if (r.canceled) {
-          announceFileNotSaved();
-        } else {
-          preloadReSaveFile(relativeNotePath(r.filePath));
-        }
+        if (r.canceled) announceFileNotSaved();
+        else preloadReSaveFile(relativeNotePath(r.filePath));
       });
     }
   });
@@ -88,18 +81,13 @@ function rePromptSave() {
 function promptSaveDiscardableThenNew() {
   dialog.showMessageBox(win, optionsDiscard)
   .then(r => {
-    if (r.response==0) {
-      announceFileDiscardedForNewFile();
-    } else if (r.response==1) {
-      preloadTrySaveFileThenNewFile();
-    } else {
+    if (r.response==0) announceFileDiscardedForNewFile();
+    else if (r.response==1) preloadTrySaveFileThenNewFile();
+    else {
       dialog.showSaveDialog(win, optionsSaveAs)
       .then(r => {
-        if (r.canceled) {
-          announceFileDiscardedForNewFile();
-        } else {
-          preloadSaveFileThenNewFile(relativeNotePath(r.filePath));
-        }
+        if (r.canceled) announceFileDiscardedForNewFile();
+        else preloadSaveFileThenNewFile(relativeNotePath(r.filePath));
       });
     }
   });
@@ -110,18 +98,13 @@ function promptSaveDiscardableThenNew() {
 function promptSaveDiscardableThenRead(filename) {
   dialog.showMessageBox(win, optionsDiscard)
   .then(r => {
-    if (r.response==0) {
-      announceFileDiscardedForReadFile(filename);
-    } else if (r.response==1) {
-      preloadTrySaveFileThenReadFile(filename);
-    } else {
+    if (r.response==0) announceFileDiscardedForReadFile(filename);
+    else if (r.response==1) preloadTrySaveFileThenReadFile(filename);
+    else {
       dialog.showSaveDialog(win, optionsSaveAs)
       .then(r => {
-        if (r.canceled) {
-          announceFileDiscardedForReadFile(filename);
-        } else {
-          preloadSaveFileThenReadFile(relativeNotePath(r.filePath), filename);
-        }
+        if (r.canceled) announceFileDiscardedForReadFile(filename);
+        else preloadSaveFileThenReadFile(relativeNotePath(r.filePath), filename);
       });
     }
   });
@@ -132,16 +115,12 @@ function promptSaveDiscardableThenRead(filename) {
 function rePromptSaveDiscardableThenNew() {
   dialog.showMessageBox(win, optionsSaveError)
   .then(r => {
-    if (r.response==0) {
-      announceFileDiscardedForNewFile();
-    } else {
+    if (r.response==0) announceFileDiscardedForNewFile();
+    else {
       dialog.showSaveDialog(win, optionsSaveAs)
       .then(r => {
-        if (r.canceled) {
-          announceFileDiscardedForNewFile();
-        } else {
-          preloadReSaveFileThenNewFile(relativeNotePath(r.filePath));
-        }
+        if (r.canceled) announceFileDiscardedForNewFile();
+        else preloadReSaveFileThenNewFile(relativeNotePath(r.filePath));
       });
     }
   });
@@ -377,14 +356,10 @@ function initializeWindow() {
 app.on("ready", initializeWindow);
 
 app.on("window-all-closed", () => {
-  if (process.platform !== "darwin") {
-    app.quit();
-  }
+  if (process.platform !== "darwin") app.quit();
 });
 
 app.on("activate", () => {
-  if (win === null) {
-    initializeWindow();
-  }
+  if (win === null) initializeWindow();
 });
 

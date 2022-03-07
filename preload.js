@@ -36,11 +36,8 @@ function saveFile(filename) {
 // Otherwise ask main to prompt for a new file name and proceed through
 // `saveFile` logic.
 function trySaveFile() {
-  if (currentFile == "") {
-    mainPromptSave();
-  } else {
-    rendererSendContentForSave();
-  }
+  if (currentFile == "") mainPromptSave();
+  else rendererSendContentForSave();
 };
 
 // Cache the new file name and ask renderer to send editor content to be saved
@@ -54,22 +51,16 @@ function saveFileThenNewFile(filename) {
 // Otherwise ask main to prompt for a new file name and proceed through
 // `saveFileThenNewFile` logic.
 function trySaveFileThenNewFile() {
-  if (currentFile == "") {
-    mainPromptSaveDiscardableThenNew();
-  } else {
-    rendererSendContentForSaveThenNew();
-  }
+  if (currentFile == "") mainPromptSaveDiscardableThenNew();
+  else rendererSendContentForSaveThenNew();
 };
 
 // If the file name is cached, save the cached content to it. Otherwise ask
 // main to prompt for a new file name and proceed through
 // `saveFileThenReadFile` logic.
 function trySaveFileThenReadFile(filename) {
-  if (currentFile == "") {
-    mainPromptSaveDiscardableThenRead(filename);
-  } else {
-    writeFileThenReadFile(currentFile, currentNote, filename);
-  }
+  if (currentFile == "") mainPromptSaveDiscardableThenRead(filename);
+  else writeFileThenReadFile(currentFile, currentNote, filename);
 };
 
 // Read a directory and return a sorted array of all file names.
@@ -81,9 +72,8 @@ function readNotesDirectory(directory) {
 // Read a file and send the content and title to the renderer.
 function readNoteFromFile(filename) {
   fs.readFile(relativeNotePath(filename), "utf8", (err, content) => {
-    if (err) {
-      announceFileUnreadable();
-    } else {
+    if (err) announceFileUnreadable();
+    else {
       currentFile = filename;
       currentNote = content;
       rendererNewTitle(filename);
